@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>A loveletter to LA</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+	<style type="text/css">
+	html,body { height: 100%; margin: 0px; padding: 0px; }
+	#map, .container-fluid, .row, .siderail {
+		height: 100%;
+	}
+	#map {
+		box-shadow: 0 0 8px black;
+	}
+	.siderail {
+		overflow: hidden;
+		position: relative;
+		transform: translateX(0);
+	}
+	</style>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/css/reveal.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/css/theme/white.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/tomorrow.min.css">
+        <style type="text/css">
+            .reveal, 
+            .reveal h1, .reveal h2, .reveal h3,
+            .reveal h4, .reveal h5, .reveal h6 {
+                color: #333;
+                font-family: monospace;
+                font-weight: normal;
+                text-transform: none;
+            }
+            .reveal section img,
+            .reveal blockquote,
+            .reveal pre code, .reveal pre {
+                background: none;
+                border: none;
+                box-shadow: none;
+                color: inherit;
+            }
+            .reveal .controls {
+                opacity: .3;
+            }
+        </style>
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-4 siderail">
+				<div class="reveal">
+            		<div class="slides">
+            			<section data-markdown>
+                    		<script type="text/template">
+## Welcome to Los Angeles.
+
+LA is the second largest city in the country and home to some of its
+most memorable landmarks.
+
+If you're unfamiliar with LA, this guide should help understand its basic
+geography and features.
+		                    </script>
+		                </section>
+                		<section data-markdown>
+                    		<script type="text/template">
+##There are a few things to realize about LA. 
+		                    </script>
+		                </section>
+		                <section data-markdown>
+                    		<script type="text/template">
+##Firstly, it's huge.
+
+At 503 square miles, it's more than twice the size of Chicago.  North to South, it spans 55 miles.  US Cellular Field is closer to Wisconsin than that.
+
+It contains multiple mountain ranges, completely envelopes other cities.  3.9 million people live within the city limits, 13.1 million in the metro area.
+The city ranges from beaches to 5,074 ft above sea level.  Mt Baldy, at 10,064 ft, is in the national park just outside city limits.
+
+		                    </script>
+		                </section>
+		                <section data-markdown>
+                    		<script type="text/template">
+##Secondly, LA is more than just the city limits.
+
+LA County is over 4,700 square miles.  That's larger than Delaware and Rhode Island combined and only slightly smaller than Connecticut.  A lot of what people call LA is actually outside of the city limits.  I'll try to distinguish between what is in the city, what is in the county, and what is in the metro area. 
+		                    </script>
+		                </section>
+		                <section data-markdown>
+                    		<script type="text/template">
+##Secondly, LA is more than just the city limits.
+
+LA County is over 4,700 square miles.  That's larger than Delaware and Rhode Island combined and only slightly smaller than Connecticut.  A lot of what people call LA is actually outside of the city limits.  I'll try to distinguish between what is in the city, what is in the county, and what is in the metro area. 
+		                    </script>
+		                </section>
+		                <section data-markdown>
+                    		<script type="text/template">
+##Secondly, LA is more than just the city limits.
+
+LA County is over 4,700 square miles.  That's larger than Delaware and Rhode Island combined and only slightly smaller than Connecticut.  A lot of what people call LA is actually outside of the city limits.  I'll try to distinguish between what is in the city, what is in the county, and what is in the metro area. 
+		                    </script>
+		                </section>
+
+            		</div>
+            	</div>
+			</div>
+			<div id="map" class="col-md-8"></div>
+		</div>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/lib/js/head.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/js/reveal.min.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
