@@ -96,7 +96,7 @@
 		}
 	})//.addTo(map);
 
-	fetch('/geojson/la-county-neighborhoods-current.json').then(function(resp) {
+	fetch('geojson/la-county-neighborhoods-current.json').then(function(resp) {
 		resp.json().then(function(data) {
 			neighborhoods.addData(data);
 			cities.addData(data);
