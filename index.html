@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>A loveletter to LA</title>
+	<!-- <title>A loveletter to LA</title> -->
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,7 @@
 
 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+	
 	<style type="text/css">
 	html,body { height: 100%; margin: 0px; padding: 0px; }
 	#map, .container-fluid, .row, .siderail {
@@ -26,39 +27,40 @@
 		transform: translateX(0);
 	}
 	</style>
+
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/css/reveal.min.css">
-        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/css/theme/white.min.css">
-        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/tomorrow.min.css">
-        <style type="text/css">
-            .reveal, 
-            .reveal h1, .reveal h2, .reveal h3,
-            .reveal h4, .reveal h5, .reveal h6 {
-                color: #333;
-                font-family: monospace;
-                font-weight: normal;
-                text-transform: none;
-            }
-            .reveal section img,
-            .reveal blockquote,
-            .reveal pre code, .reveal pre {
-                background: none;
-                border: none;
-                box-shadow: none;
-                color: inherit;
-            }
-            .reveal .controls {
-                opacity: .3;
-            }
-        </style>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/css/theme/white.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/tomorrow.min.css">
+    <style type="text/css">
+        .reveal, 
+        .reveal h1, .reveal h2, .reveal h3,
+        .reveal h4, .reveal h5, .reveal h6 {
+            color: #333;
+            font-family: monospace;
+            font-weight: normal;
+            text-transform: none;
+        }
+        .reveal section img,
+        .reveal blockquote,
+        .reveal pre code, .reveal pre {
+            background: none;
+            border: none;
+            box-shadow: none;
+            color: inherit;
+        }
+        /*.reveal .controls {
+            opacity: .3;
+        }*/
+    </style>
 </head>
 
 <body>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-4 siderail">
+			<div class="col-md-6 siderail">
 				<div class="reveal">
             		<div class="slides">
-            			<section data-markdown>
+            			<section data-markdown data-map="initial">
                     		<script type="text/template">
 ## Welcome to Los Angeles.
 
@@ -69,53 +71,116 @@ If you're unfamiliar with LA, this guide should help understand its basic
 geography and features.
 		                    </script>
 		                </section>
-                		<section data-markdown>
+                		<section data-markdown data-map="initial">
                     		<script type="text/template">
 ##There are a few things to realize about LA. 
 		                    </script>
 		                </section>
-		                <section data-markdown>
+		                <section data-markdown data-map="neighborhoods">
                     		<script type="text/template">
 ##Firstly, it's huge.
 
 At 503 square miles, it's more than twice the size of Chicago.  North to South, it spans 55 miles.  US Cellular Field is closer to Wisconsin than that.
 
 It contains multiple mountain ranges, completely envelopes other cities.  3.9 million people live within the city limits, 13.1 million in the metro area.
+
 The city ranges from beaches to 5,074 ft above sea level.  Mt Baldy, at 10,064 ft, is in the national park just outside city limits.
 
 		                    </script>
 		                </section>
-		                <section data-markdown>
+		                <section data-markdown data-map="neighborhoods+cities">
                     		<script type="text/template">
 ##Secondly, LA is more than just the city limits.
 
-LA County is over 4,700 square miles.  That's larger than Delaware and Rhode Island combined and only slightly smaller than Connecticut.  A lot of what people call LA is actually outside of the city limits.  I'll try to distinguish between what is in the city, what is in the county, and what is in the metro area. 
+LA County is over 4,700 square miles.  That's larger than Delaware and Rhode Island combined and only slightly smaller than Connecticut.  
+
+A lot of what people call LA is actually outside of the city limits.  I'll try to distinguish between what is in the city, what is in the county, and what is in the metro area. 
 		                    </script>
 		                </section>
-		                <section data-markdown>
+		                <section data-markdown data-map="neighborhoods">
                     		<script type="text/template">
-##Secondly, LA is more than just the city limits.
+##Some Basic Geography
 
-LA County is over 4,700 square miles.  That's larger than Delaware and Rhode Island combined and only slightly smaller than Connecticut.  A lot of what people call LA is actually outside of the city limits.  I'll try to distinguish between what is in the city, what is in the county, and what is in the metro area. 
+LA is largely seated in a basin that's bordered by the Santa Monica Bay on the south-west and mountains on all sides.
 		                    </script>
 		                </section>
-		                <section data-markdown>
+		                <section data-markdown data-map="bay">
                     		<script type="text/template">
-##Secondly, LA is more than just the city limits.
+##The Bay
 
-LA County is over 4,700 square miles.  That's larger than Delaware and Rhode Island combined and only slightly smaller than Connecticut.  A lot of what people call LA is actually outside of the city limits.  I'll try to distinguish between what is in the city, what is in the county, and what is in the metro area. 
+Santa Monica Bay is usually delimeted by Point Dume in Malibu in the north and the Palos Verdes Peninsula in the south.
+
+The coastline of the bay is nearly 50 miles long.
+		                    </script>
+		                </section>
+
+		                <section data-markdown data-map="point-dume">
+                    		<script type="text/template">
+##Point Dume
+
+Point Dume is a pretty famous beach where Charlton Heston made some shocking realizations in Planet of the Apes.
+
+![planet of the apes finale](images/planet-of-the-apes.jpeg)
+
+It's been in plenty of other movies too.
+		                    </script>
+		                </section>
+		                <section data-markdown data-map="palos-verdes">
+                    		<script type="text/template">
+##Palos Verdes
+
+Palos Verdes is known for its beautiful cliffs, horse trails, and expensive homes.
+
+![planet of the apes finale](images/palos-verdes.jpg)
+
+The [Wayfarer's Chapel](https://en.wikipedia.org/wiki/Wayfarers_Chapel) (Frank Lloyd Wright) is there as well.
+		                    </script>
+		                </section>
+
+		                <section data-markdown data-map="channel-islands">
+                    		<script type="text/template">
+##Channel Islands
+
+Outside of the bay are the Channel Islands.  Catalina Island is the largest and most famous.  LA County has 2 Channel Islands.  San Clemente is used by the military.
+
+The Channel Islands are technically an underwater mountain range, and the Palos Verdes Peninsula is formed as the landed-end of the same range.
+		                    </script>
+		                </section>
+
+		                <section data-markdown data-map="regions">
+                    		<script type="text/template">
+##Where in LA are you from?
+
+The LA Times has done a fantastic job of breaking LA into 16 regions encompassing 114 neighborhoods, 158 cities, and 42 unincorporated areas.  
+
+Each area has its own culture and reputation and asking one where in LA they're from is the correct response to "I'm from LA".
+
+Seriously, we're a little strange that way.  Just ask.
+		                    </script>
+		                </section>
+
+		                <section data-markdown data-map="south-bay">
+                    		<script type="text/template">
+##Where in LA are you from?
+
+The LA Times has done a fantastic job of breaking LA into 16 regions encompassing 114 neighborhoods, 158 cities, and 42 unincorporated areas.  
+
+Each area has its own culture and reputation and asking one where in LA they're from is the correct response to "I'm from LA".
+
+Seriously, we're a little strange that way.  Just ask.
 		                    </script>
 		                </section>
 
             		</div>
             	</div>
 			</div>
-			<div id="map" class="col-md-8"></div>
+			<div id="map" class="col-md-6"></div>
 		</div>
 	</div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/lib/js/head.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/js/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.0/lodash.js"></script>
     <script src="app.js"></script>
 
 </body>

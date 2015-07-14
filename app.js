@@ -1,7 +1,7 @@
-// (function(L, Reveal) {
-	// 'use strict';
+(function(L, Reveal) {
+	'use strict';
 
-	// some basic coorditnates
+	// some basic coordinates
 	var coords = {
 		'channel-islands': [
 			{"lat":32.61161640317033,"lng":-120.49255371093749},
@@ -17,10 +17,9 @@
 
 	var map = L.map('map', {
 		keyboard: false
-		// this starts at city hall
 	}).setView(coords['city-hall'], 11);
 
-	L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+	var positron = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
 		maxZoom: 18,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
 			'&copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
@@ -34,12 +33,11 @@
 		switch (kind) {
 			case 'segment-of-a-city': return 'DodgerBlue';
 			case 'standalone-city': return 'red';
-			case 'unincorporated-area': return 'green';
+			case 'unincorporated-area': return 'LightGreen';
 		}
 	}
 	var neighborhoods = L.geoJson(undefined, {
 		onEachFeature: function(feature, layer) {
-			// layer.bindPopup(feature.properties.name);
 			layer.on({
 				click: zoomToFeature
 			});
@@ -53,7 +51,24 @@
 				color: colorOfPlace(feature.properties.metadata.type)
 			};
 		}
-	})//.addTo(map);
+	});
+
+	var unincorporated = L.geoJson(undefined, {
+		onEachFeature: function(feature, layer) {
+			layer.on({
+				click: zoomToFeature
+			});
+		},
+		filter: function(feature, layer) {
+			return feature.properties.metadata.type === 'unincorporated-area';
+		},
+		style: function(feature) {
+			return { 
+				weight: 1,
+				color: 'LightGreen'
+			};
+		}
+	});
 
 	var cities = L.geoJson(undefined, {
 		onEachFeature: function(feature, layer) {
@@ -68,7 +83,48 @@
 				color: 'LightSkyBlue'
 			};
 		}
-	})//.addTo(map);
+	});
+
+	fetch('geojson/la-county-neighborhoods-current.json').then(function(resp) {
+		resp.json().then(function(data) {
+			neighborhoods.addData(data);
+			unincorporated.addData(data);
+			cities.addData(data);
+		});
+	});
+
+	var info = L.control();
+
+	info.onAdd = function (map) {
+	    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+	    this.update();
+	    return this._div;
+	};
+
+	// method that we will use to update the control based on feature properties passed
+	info.update = function (props) {
+	    this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
+	        '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+	        : 'Hover over a state');
+	};
+
+	var regions = L.geoJson(undefined, {
+		onEachFeature: function(feature, layer) {
+			// layer.bindPopup(feature.properties.name);
+		},
+		style: function(feature) {
+			return { 
+				weight: 1,
+				color: 'orange'
+			};
+		}
+	});
+
+	fetch('geojson/la-county-regions.json').then(function(resp) {
+		resp.json().then(function(data) {
+			regions.addData(data);
+		});
+	});
 
 	var airports = L.geoJson(undefined, {
 		onEachFeature: function(feature, layer) {
@@ -80,7 +136,7 @@
 				color: 'orange'
 			};
 		}
-	})//.addTo(map);
+	});
 
 	var bottlenecks = L.geoJson(undefined, {
 		onEachFeature: function(feature, layer) {
@@ -94,40 +150,67 @@
 			    weight: (feature.properties.Avg_Delay / 2900) * 5
 	        };
 		}
-	})//.addTo(map);
-
-	fetch('geojson/la-county-neighborhoods-current.json').then(function(resp) {
-		resp.json().then(function(data) {
-			neighborhoods.addData(data);
-			cities.addData(data);
-		});
 	});
 
-	/*
-	fetch('/geojson/405.json').then(function(resp) {
-		resp.json().then(function(data) {
-			airports.addData(data);	
-		});
-	});
+	var mapViews = {
+		'initial': {
+			layers: [],
+			call: 'setView',
+			callArgs: [coords['city-hall'], 11]
+		},
+		'neighborhoods': {
+			layers: [neighborhoods],
+			call: 'fitBounds',
+			callArgs: [neighborhoods, {animate: true}]
+		},
+		'neighborhoods+cities': {
+			layers: [neighborhoods, cities, unincorporated],
+			call: 'fitBounds',
+			callArgs: [cities, {animate: true}]
+		},
+		'regions': {
+			layers: [regions],
+			call: 'fitBounds',
+			callArgs: [regions, {animate: true}]
+		},
+		'south-bay': {
+			layers: [regions],
+			call: 'fitBounds',
+			//callArgs: [_.find(regions._layers, _.matchesProperty('feature.properties.Name', 'South Bay')), {animate: true}]
+		},
+	}
 
-	fetch('/geojson/bottlenecks.json').then(function(resp) {
-		resp.json().then(function(data) {
-			bottlenecks.addData(data);	
-		});
-	});
-
-	fetch('/geojson/runways.json').then(function(resp) {
-		resp.json().then(function(data) {
-			airports.addData(data);	
-		});
-	});
-
-	fetch('/geojson/marina.json').then(function(resp) {
-		resp.json().then(function(data) {
-			airports.addData(data);	
-		});
-	});
-	*/
+	function applyView(viewIndex) {
+		var view = mapViews[viewIndex];
+		var cObj = coords[viewIndex]
+		if (!view && cObj) {
+			if (typeof cObj[0] === 'number') {
+				map.setView(coords[viewIndex], 12, {animate: true});
+			} else {
+				map.fitBounds(coords[viewIndex], {animate: true});
+			}
+			return;
+		}
+		// filter all the layers, if provided
+		// but if there's not a layers[], then don't
+		if (view.layers !== undefined) {
+			map.eachLayer(function(layer) {
+				// TODO: it should be possible to not clear the map
+				// but layer comparison is weird in leaflet
+				if (layer !== positron) {
+					map.removeLayer(layer);
+				};
+			});
+			_.forEach(view.layers, function(layer) {
+				if (!map.hasLayer(layer)) {
+					map.addLayer(layer);
+				}
+			});
+		}
+		if (view.call) {
+			map[view.call].apply(map, view.callArgs);
+		}
+	}
 
 	Reveal.initialize({
 	    controls: true,
@@ -136,28 +219,16 @@
 	    height: 1920,
 	    dependencies: [
 	        { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/plugin/markdown/marked.js' },
-	        { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/plugin/markdown/markdown.js'},
-	        { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/plugin/highlight/highlight.js',
-	          async: true, callback: function() { hljs.initHighlightingOnLoad(); }}
+	        { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.0.0/plugin/markdown/markdown.js'}
 	    ]
 	});
 
 	Reveal.addEventListener( 'slidechanged', function( event ) {
-		console.log(event);
-		if (event.indexh == 2) {
-			neighborhoods.addTo(map);
-			map.fitBounds(neighborhoods);
-		}
-		if (event.indexh == 3) {
-			cities.addTo(map);
-			map.fitBounds(cities, {animate: true});
-		}
-		if (event.indexh == 4) {
-			map.fitBounds(coords['bay'], {animate: true});
-		}
-		if (event.indexh == 5) {
-			map.setView(coords['palos-verdes'], 11, {animate: true});
+		var prevIndex = event.previousSlide.getAttribute('data-map');
+		var mapIndex = event.currentSlide.getAttribute('data-map');
+		if (mapIndex && mapIndex !== prevIndex) {
+			applyView(mapIndex);
 		}
 	});
 
-// })(L, Reveal);
+})(L, Reveal);
