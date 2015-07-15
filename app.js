@@ -1,6 +1,8 @@
 (function(L, Reveal) {
 	'use strict';
 
+
+
 	// some basic coordinates
 	var coords = {
 		'channel-islands': [
@@ -29,69 +31,40 @@
 		map.fitBounds(e.target.getBounds());
 	}
 
+	function highlightFeature(e) {
+	    var layer = e.target;
+	    info.update(layer.feature.properties);
+	}
+	function resetHighlight(e) {
+	    info.update();
+	}
+
 	function colorOfPlace(kind) {
 		switch (kind) {
 			case 'segment-of-a-city': return 'DodgerBlue';
-			case 'standalone-city': return 'red';
+			case 'standalone-city': return 'LightSkyBlue';
 			case 'unincorporated-area': return 'LightGreen';
 		}
 	}
-	var neighborhoods = L.geoJson(undefined, {
-		onEachFeature: function(feature, layer) {
-			layer.on({
-				click: zoomToFeature
-			});
-		},
-		filter: function(feature, layer) {
-			return feature.properties.metadata.type === 'segment-of-a-city';
-		},
-		style: function(feature) {
-			return { 
-				weight: 1,
-				color: colorOfPlace(feature.properties.metadata.type)
-			};
-		}
-	});
 
-	var unincorporated = L.geoJson(undefined, {
-		onEachFeature: function(feature, layer) {
-			layer.on({
-				click: zoomToFeature
-			});
-		},
-		filter: function(feature, layer) {
-			return feature.properties.metadata.type === 'unincorporated-area';
-		},
-		style: function(feature) {
-			return { 
-				weight: 1,
-				color: 'LightGreen'
-			};
-		}
-	});
+	var legend = L.control({position: 'bottomleft'});
 
-	var cities = L.geoJson(undefined, {
-		onEachFeature: function(feature, layer) {
-			layer.bindPopup(feature.properties.name);
-		},
-		filter: function(feature, layer) {
-			return feature.properties.metadata.type === 'standalone-city';
-		},
-		style: function(feature) {
-			return { 
-				weight: 1,
-				color: 'LightSkyBlue'
-			};
-		}
-	});
+	legend.onAdd = function (map) {
 
-	fetch('geojson/la-county-neighborhoods-current.json').then(function(resp) {
-		resp.json().then(function(data) {
-			neighborhoods.addData(data);
-			unincorporated.addData(data);
-			cities.addData(data);
-		});
-	});
+	    var div = L.DomUtil.create('div', 'info legend'),
+	        grades = ['segment-of-a-city', 'standalone-city', 'unincorporated-area'],
+	        labels = ['City Neighborhood', 'Standalone City', 'Unnincorporated Area'];
+
+	    // loop through our density intervals and generate a label with a colored square for each interval
+	    for (var i = 0; i < grades.length; i++) {
+	        div.innerHTML +=
+	            '<i style="background:' + colorOfPlace(grades[i]) + '"></i> ' + labels[i] + '<br>';
+	    }
+
+	    return div;
+	};
+
+	legend.addTo(map);
 
 	var info = L.control();
 
@@ -103,15 +76,59 @@
 
 	// method that we will use to update the control based on feature properties passed
 	info.update = function (props) {
-	    this._div.innerHTML = '<h4>US Population Density</h4>' +  (props ?
-	        '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-	        : 'Hover over a state');
+	    this._div.innerHTML = (props ? '<b>' + (props.name || props.Name) + '</b>': 'Hover over an area');
 	};
 
+	info.addTo(map);
+
+	function styleCity(feature) {
+		return { 
+			weight: 1,
+			color: colorOfPlace(feature.properties.metadata.type)
+		};
+	}
+	function doInfoStuff(feature, layer) {
+		layer.on({
+	        mouseover: highlightFeature,
+	        mouseout: resetHighlight
+	     });
+	}
+
+	var regionHoods = ['south-bay'].reduce(function(prev, name) {
+		prev[name] = L.geoJson(undefined, {
+			onEachFeature: doInfoStuff,
+			filter: function(feature, layer) {
+				return feature.properties.metadata.region === name;
+			},
+			style: styleCity
+		});
+		return prev;
+	}, {});
+
+	var kinds = ['segment-of-a-city', 'standalone-city', 'unincorporated-area'];
+	var countyHoods = kinds.reduce(function(prev, kind) {
+		prev[kind] = L.geoJson(undefined, {
+			filter: function(feature, layer) {
+				return feature.properties.metadata.type === kind;
+			},
+			style: styleCity
+		});
+		return prev;
+	}, {});
+
+	fetch('geojson/la-county-neighborhoods-current.json').then(function(resp) {
+		resp.json().then(function(data) {
+			_.forIn(regionHoods, function(layer) {
+				layer.addData(data);
+			});
+			_.forIn(countyHoods, function(layer) {
+				layer.addData(data);
+			});
+		});
+	});
+
 	var regions = L.geoJson(undefined, {
-		onEachFeature: function(feature, layer) {
-			// layer.bindPopup(feature.properties.name);
-		},
+		onEachFeature: doInfoStuff,
 		style: function(feature) {
 			return { 
 				weight: 1,
@@ -126,6 +143,21 @@
 		});
 	});
 
+	/*
+	fetch('geojson/freeways.json').then(function(resp) {
+		resp.json().then(function(data) {
+			L.geoJson(data, {
+				style: function(feature) {
+					return { 
+						weight: 3,
+						color: 'red'
+					};
+				}
+			}).addTo(map);
+		});
+	});
+	*/
+
 	var airports = L.geoJson(undefined, {
 		onEachFeature: function(feature, layer) {
 			layer.bindPopup(feature.properties.name);
@@ -138,20 +170,6 @@
 		}
 	});
 
-	var bottlenecks = L.geoJson(undefined, {
-		onEachFeature: function(feature, layer) {
-			var props = feature.properties;
-			var label = props.Freeway;
-			layer.bindPopup(label);
-		},
-		style: function(feature) {
-	        return {
-	            color: 'red',
-			    weight: (feature.properties.Avg_Delay / 2900) * 5
-	        };
-		}
-	});
-
 	var mapViews = {
 		'initial': {
 			layers: [],
@@ -159,14 +177,14 @@
 			callArgs: [coords['city-hall'], 11]
 		},
 		'neighborhoods': {
-			layers: [neighborhoods],
+			layers: [countyHoods['segment-of-a-city']],
 			call: 'fitBounds',
-			callArgs: [neighborhoods, {animate: true}]
+			callArgs: [countyHoods['segment-of-a-city'], {animate: true}]
 		},
 		'neighborhoods+cities': {
-			layers: [neighborhoods, cities, unincorporated],
+			layers: countyHoods,
 			call: 'fitBounds',
-			callArgs: [cities, {animate: true}]
+			callArgs: [countyHoods['unincorporated-area'], {animate: true}]
 		},
 		'regions': {
 			layers: [regions],
@@ -174,11 +192,12 @@
 			callArgs: [regions, {animate: true}]
 		},
 		'south-bay': {
-			layers: [regions],
+			layers: [regionHoods['south-bay']],
 			call: 'fitBounds',
 			//callArgs: [_.find(regions._layers, _.matchesProperty('feature.properties.Name', 'South Bay')), {animate: true}]
+			callArgs: [regionHoods['south-bay'], {animate: true}]
 		},
-	}
+	};
 
 	function applyView(viewIndex) {
 		var view = mapViews[viewIndex];

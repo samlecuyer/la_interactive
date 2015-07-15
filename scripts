@@ -1,0 +1,8 @@
+## These assume that you've cloned the data dir into your repo
+## and that you're in there
+
+# clip the freeways to a reasonable bounding box
+ogr2ogr -t_srs WGS84 -f GeoJSON \
+  -sql "select ROUTE, ROUTE_ID from shn2014_ln where ROUTE in ('10','110','101','5','105','405','90')" \
+  -clipdst -118.69216918945312 33.45206821659518 -117.83523559570312 34.49976628863743 \
+  ../geojson/freeways.json shn2014_ln
