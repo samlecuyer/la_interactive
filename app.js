@@ -1,7 +1,7 @@
 (function(L, Reveal) {
 	'use strict';
 
-
+	var doAnimate = {animate: true};
 
 	// some basic coordinates
 	var coords = {
@@ -84,7 +84,8 @@
 	function styleCity(feature) {
 		return { 
 			weight: 1,
-			color: colorOfPlace(feature.properties.metadata.type)
+			color: colorOfPlace(feature.properties.metadata.type),
+			fillOpacity: 0.2
 		};
 	}
 	function doInfoStuff(feature, layer) {
@@ -179,23 +180,23 @@
 		'neighborhoods': {
 			layers: [countyHoods['segment-of-a-city']],
 			call: 'fitBounds',
-			callArgs: [countyHoods['segment-of-a-city'], {animate: true}]
+			callArgs: [countyHoods['segment-of-a-city'], doAnimate]
 		},
 		'neighborhoods+cities': {
 			layers: countyHoods,
 			call: 'fitBounds',
-			callArgs: [countyHoods['unincorporated-area'], {animate: true}]
+			callArgs: [countyHoods['unincorporated-area'], doAnimate]
 		},
 		'regions': {
 			layers: [regions],
 			call: 'fitBounds',
-			callArgs: [regions, {animate: true}]
+			callArgs: [regions, doAnimate]
 		},
 		'south-bay': {
 			layers: [regionHoods['south-bay']],
 			call: 'fitBounds',
 			//callArgs: [_.find(regions._layers, _.matchesProperty('feature.properties.Name', 'South Bay')), {animate: true}]
-			callArgs: [regionHoods['south-bay'], {animate: true}]
+			callArgs: [regionHoods['south-bay'], doAnimate]
 		},
 	};
 
@@ -204,9 +205,9 @@
 		var cObj = coords[viewIndex]
 		if (!view && cObj) {
 			if (typeof cObj[0] === 'number') {
-				map.setView(coords[viewIndex], 12, {animate: true});
+				map.setView(coords[viewIndex], 12, doAnimate);
 			} else {
-				map.fitBounds(coords[viewIndex], {animate: true});
+				map.fitBounds(coords[viewIndex], doAnimate);
 			}
 			return;
 		}
@@ -231,6 +232,23 @@
 		}
 	}
 
+	function applyHighlight(mapIndex, index) {
+		var region = regionHoods[mapIndex];
+		_.forIn(region._layers, function(feature) {
+			region.resetStyle(feature);
+		});
+		if (index) {
+			_.forEach(index.split(','), function(index) {
+				var hood = _.find(region._layers, 
+						_.matchesProperty(['feature', 'properties', 'metadata', 'slug'], index));
+				hood.setStyle({
+					weight: 4,
+					fillOpacity: 0.6
+				});
+			});
+		}
+	}
+
 	Reveal.initialize({
 	    controls: true,
 	    embedded: true,
@@ -247,6 +265,11 @@
 		var mapIndex = event.currentSlide.getAttribute('data-map');
 		if (mapIndex && mapIndex !== prevIndex) {
 			applyView(mapIndex);
+		}
+
+		var hiliteIndex = event.currentSlide.getAttribute('data-highlight');
+		if (mapIndex) {
+			applyHighlight(mapIndex, hiliteIndex);
 		}
 	});
 
