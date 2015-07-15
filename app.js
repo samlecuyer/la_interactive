@@ -12,7 +12,8 @@
 		'city-hall': [34.0536, -118.243],
 		'hollywood-sign': [34.134103, -118.321694],
 		'point-dume': [34.000872, -118.806839],
-		'palos-verdes': [33.758647, -118.345844]
+		'palos-verdes': [33.758647, -118.345844],
+		'orange-crush': [33.7801, -117.8792]
 	};
 	// composite views
 	coords['bay'] = [coords['point-dume'], coords['palos-verdes']];
@@ -109,6 +110,7 @@
 	var kinds = ['segment-of-a-city', 'standalone-city', 'unincorporated-area'];
 	var countyHoods = kinds.reduce(function(prev, kind) {
 		prev[kind] = L.geoJson(undefined, {
+			onEachFeature: doInfoStuff,
 			filter: function(feature, layer) {
 				return feature.properties.metadata.type === kind;
 			},
@@ -138,26 +140,28 @@
 		}
 	});
 
+	var freeways = L.geoJson(undefined, {
+		onEachFeature: doInfoStuff,
+		style: function(feature) {
+			return { 
+				weight: 3,
+				color: 'orange'
+			};
+		}
+	});
+
 	fetch('geojson/la-county-regions.json').then(function(resp) {
 		resp.json().then(function(data) {
 			regions.addData(data);
 		});
 	});
 
-	/*
+	
 	fetch('geojson/freeways.json').then(function(resp) {
 		resp.json().then(function(data) {
-			L.geoJson(data, {
-				style: function(feature) {
-					return { 
-						weight: 3,
-						color: 'red'
-					};
-				}
-			}).addTo(map);
+			freeways.addData(data);
 		});
 	});
-	*/
 
 	var airports = L.geoJson(undefined, {
 		onEachFeature: function(feature, layer) {
@@ -198,6 +202,11 @@
 			//callArgs: [_.find(regions._layers, _.matchesProperty('feature.properties.Name', 'South Bay')), {animate: true}]
 			callArgs: [regionHoods['south-bay'], doAnimate]
 		},
+		'freeways': {
+			layers: [freeways],
+			call: 'fitBounds',
+			callArgs: [freeways, doAnimate]
+		},
 	};
 
 	function applyView(viewIndex) {
@@ -233,18 +242,28 @@
 	}
 
 	function applyHighlight(mapIndex, index) {
-		var region = regionHoods[mapIndex];
+		var region = (mapIndex === 'freeways') ? freeways : regionHoods[mapIndex];
+		if (!region) {
+			return;
+		}
 		_.forIn(region._layers, function(feature) {
 			region.resetStyle(feature);
 		});
 		if (index) {
 			_.forEach(index.split(','), function(index) {
-				var hood = _.find(region._layers, 
-						_.matchesProperty(['feature', 'properties', 'metadata', 'slug'], index));
-				hood.setStyle({
+				var match = ['feature', 'properties', 'metadata', 'slug'];
+				var styles = {
 					weight: 4,
 					fillOpacity: 0.6
-				});
+				};
+				if (mapIndex === 'freeways') {
+					match = ['feature', 'properties', 'route'];
+					styles = {
+						color: 'orangered'
+					}
+				}
+				var hood = _.find(region._layers, _.matchesProperty(match, index));
+				hood.setStyle(styles);
 			});
 		}
 	}
