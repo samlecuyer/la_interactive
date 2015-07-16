@@ -96,7 +96,8 @@
 	     });
 	}
 
-	var regionHoods = ['south-bay'].reduce(function(prev, name) {
+	var regionNames = ['south-bay', 'harbor', 'south-la'];
+	var regionHoods = regionNames.reduce(function(prev, name) {
 		prev[name] = L.geoJson(undefined, {
 			onEachFeature: doInfoStuff,
 			filter: function(feature, layer) {
@@ -163,6 +164,12 @@
 		});
 	});
 
+	fetch('geojson/marina.json').then(function(resp) {
+		resp.json().then(function(data) {
+			freeways.addData(data);
+		});
+	});
+
 	var airports = L.geoJson(undefined, {
 		onEachFeature: function(feature, layer) {
 			layer.bindPopup(feature.properties.name);
@@ -196,18 +203,20 @@
 			call: 'fitBounds',
 			callArgs: [regions, doAnimate]
 		},
-		'south-bay': {
-			layers: [regionHoods['south-bay']],
-			call: 'fitBounds',
-			//callArgs: [_.find(regions._layers, _.matchesProperty('feature.properties.Name', 'South Bay')), {animate: true}]
-			callArgs: [regionHoods['south-bay'], doAnimate]
-		},
 		'freeways': {
 			layers: [freeways],
 			call: 'fitBounds',
 			callArgs: [freeways, doAnimate]
 		},
 	};
+
+	regionNames.forEach(function(name) {
+		mapViews[name] = {
+			layers: [regionHoods[name]],
+			call: 'fitBounds',
+			callArgs: [regionHoods[name], doAnimate]
+		}
+	});
 
 	function applyView(viewIndex) {
 		var view = mapViews[viewIndex];
@@ -241,7 +250,7 @@
 		}
 	}
 
-	function applyHighlight(mapIndex, index) {
+	function applyHighlight(mapIndex, index, doZoom) {
 		var region = (mapIndex === 'freeways') ? freeways : regionHoods[mapIndex];
 		if (!region) {
 			return;
@@ -264,6 +273,10 @@
 				}
 				var hood = _.find(region._layers, _.matchesProperty(match, index));
 				hood.setStyle(styles);
+				// this doesn't work with more than one hilight
+				if (doZoom) {
+					map.fitBounds(hood, doAnimate);
+				}
 			});
 		}
 	}
@@ -287,8 +300,9 @@
 		}
 
 		var hiliteIndex = event.currentSlide.getAttribute('data-highlight');
+		var doZoom = event.currentSlide.hasAttribute('data-zoom');
 		if (mapIndex) {
-			applyHighlight(mapIndex, hiliteIndex);
+			applyHighlight(mapIndex, hiliteIndex, doZoom);
 		}
 	});
 

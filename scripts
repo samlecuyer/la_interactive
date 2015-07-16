@@ -3,9 +3,14 @@
 
 # clip the freeways to a reasonable bounding box
 ogr2ogr -t_srs WGS84 -f GeoJSON \
-  -sql "select ROUTE as route from shn2014_ln where ROUTE in ('1','10','110','101','5','105','405','90') and DIR in ('N','E')" \
+  -sql "select ROUTE as route from shn2014_ln where ROUTE in ('1','10','110','101','5','105','405') and DIR in ('N','E')" \
   -clipdst -119.03549194335938 33.36379663433047 -117.60040283203125 34.82620475144151 \
   ../geojson/freeways.json shn2014_ln
+
+ogr2ogr -t_srs WGS84 -f GeoJSON \
+  -sql "select ROUTE as route from shn2014_ln where ROUTE in ('90') and DIR in ('N','E')" \
+  -clipdst -118.46986770629883 33.921568649507755 -118.36051940917969 34.03573290387622 \
+  ../geojson/marina.json shn2014_ln
 
 # orange crush
 ogr2ogr -t_srs WGS84 -f GeoJSON \
@@ -13,4 +18,4 @@ ogr2ogr -t_srs WGS84 -f GeoJSON \
   -clipdst -117.87 33.77 -117.88 33.79 \
   ../geojson/orange_crush.json shn2014_ln
 
-  "{"_southWest":{"lat":33.77187020532358,"lng":-117.9077625274658},"_northEast":{"lat":33.79163115619714,"lng":-117.85051345825194}}"
+ 
