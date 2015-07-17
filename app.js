@@ -96,7 +96,7 @@
 	     });
 	}
 
-	var regionNames = ['south-bay', 'harbor', 'south-la'];
+	var regionNames = ['south-bay', 'harbor', 'south-la', 'westside', 'santa-monica-mountains'];
 	var regionHoods = regionNames.reduce(function(prev, name) {
 		prev[name] = L.geoJson(undefined, {
 			onEachFeature: doInfoStuff,
@@ -142,7 +142,6 @@
 	});
 
 	var freeways = L.geoJson(undefined, {
-		onEachFeature: doInfoStuff,
 		style: function(feature) {
 			return { 
 				weight: 3,
@@ -218,7 +217,7 @@
 		}
 	});
 
-	function applyView(viewIndex) {
+	function applyView(viewIndex, doZoom) {
 		var view = mapViews[viewIndex];
 		var cObj = coords[viewIndex]
 		if (!view && cObj) {
@@ -245,7 +244,7 @@
 				}
 			});
 		}
-		if (view.call) {
+		if (view.call && !doZoom) {
 			map[view.call].apply(map, view.callArgs);
 		}
 	}
@@ -295,12 +294,11 @@
 	Reveal.addEventListener( 'slidechanged', function( event ) {
 		var prevIndex = event.previousSlide.getAttribute('data-map');
 		var mapIndex = event.currentSlide.getAttribute('data-map');
-		if (mapIndex && mapIndex !== prevIndex) {
-			applyView(mapIndex);
-		}
-
 		var hiliteIndex = event.currentSlide.getAttribute('data-highlight');
 		var doZoom = event.currentSlide.hasAttribute('data-zoom');
+		if (mapIndex && mapIndex !== prevIndex) {
+			applyView(mapIndex, doZoom && hiliteIndex);
+		}
 		if (mapIndex) {
 			applyHighlight(mapIndex, hiliteIndex, doZoom);
 		}
