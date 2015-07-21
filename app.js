@@ -13,7 +13,8 @@
 		'hollywood-sign': [34.134103, -118.321694],
 		'point-dume': [34.000872, -118.806839],
 		'palos-verdes': [33.758647, -118.345844],
-		'orange-crush': [33.7801, -117.8792]
+		'orange-crush': [33.7801, -117.8792],
+		'the-90': [[33.94093896671995,-118.46437454223633],[34.02861991381927,-118.36772918701172]]
 	};
 	// composite views
 	coords['bay'] = [coords['point-dume'], coords['palos-verdes']];
@@ -96,7 +97,9 @@
 	     });
 	}
 
-	var regionNames = ['south-bay', 'harbor', 'south-la', 'westside', 'santa-monica-mountains'];
+	var regionNames = ['south-bay', 'harbor', 'south-la', 'central-la', 'san-gabriel-valley',
+					   'san-fernando-valley',
+					   'northeast-la', 'verdugos', 'westside', 'santa-monica-mountains'];
 	var regionHoods = regionNames.reduce(function(prev, name) {
 		prev[name] = L.geoJson(undefined, {
 			onEachFeature: doInfoStuff,
@@ -150,12 +153,27 @@
 		}
 	});
 
+	var surroundingCounties = L.geoJson(undefined, {
+		onEachFeature: doInfoStuff,
+		style: function(feature) {
+			return { 
+				weight: 3,
+				color: 'orange'
+			};
+		}
+	});
+
 	fetch('geojson/la-county-regions.json').then(function(resp) {
 		resp.json().then(function(data) {
 			regions.addData(data);
 		});
 	});
 
+	fetch('geojson/surrounding.json').then(function(resp) {
+		resp.json().then(function(data) {
+			surroundingCounties.addData(data);
+		});
+	});
 	
 	fetch('geojson/freeways.json').then(function(resp) {
 		resp.json().then(function(data) {
@@ -202,10 +220,25 @@
 			call: 'fitBounds',
 			callArgs: [regions, doAnimate]
 		},
+		'surrounding-counties': {
+			layers: [surroundingCounties],
+			call: 'fitBounds',
+			callArgs: [surroundingCounties, doAnimate]
+		},
 		'freeways': {
 			layers: [freeways],
 			call: 'fitBounds',
 			callArgs: [freeways, doAnimate]
+		},
+		'freeways-valley': {
+			layers: [freeways, regionHoods['san-fernando-valley']],
+			call: 'fitBounds',
+			callArgs: [freeways, doAnimate]
+		},
+		'freeways-90': {
+			layers: [freeways],
+			call: 'fitBounds',
+			callArgs: [coords['the-90'], doAnimate]
 		},
 	};
 
@@ -249,8 +282,12 @@
 		}
 	}
 
+	function isFreeways(name) {
+		return name.indexOf('freeways') === 0;
+	}
 	function applyHighlight(mapIndex, index, doZoom) {
-		var region = (mapIndex === 'freeways') ? freeways : regionHoods[mapIndex];
+		var isFreewaysRegion = isFreeways(mapIndex);
+		var region = isFreewaysRegion ? freeways : regionHoods[mapIndex];
 		if (!region) {
 			return;
 		}
@@ -264,7 +301,7 @@
 					weight: 4,
 					fillOpacity: 0.6
 				};
-				if (mapIndex === 'freeways') {
+				if (isFreewaysRegion) {
 					match = ['feature', 'properties', 'route'];
 					styles = {
 						color: 'orangered'
@@ -282,7 +319,7 @@
 
 	Reveal.initialize({
 	    controls: true,
-	    embedded: true,
+	    // embedded: true,
 	    width: 960,
 	    height: 1920,
 	    dependencies: [
