@@ -3,6 +3,8 @@
 
 	var doAnimate = {animate: true};
 
+	var dataFetch = [];
+
 	// some basic coordinates
 	var coords = {
 		'channel-islands': [
@@ -123,8 +125,8 @@
 		return prev;
 	}, {});
 
-	fetch('geojson/la-county-neighborhoods-current.json').then(function(resp) {
-		resp.json().then(function(data) {
+	dataFetch.push(fetch('geojson/la-county-neighborhoods-current.json').then(function(resp) {
+		return resp.json().then(function(data) {
 			_.forIn(regionHoods, function(layer) {
 				layer.addData(data);
 			});
@@ -132,7 +134,7 @@
 				layer.addData(data);
 			});
 		});
-	});
+	}));
 
 	var regions = L.geoJson(undefined, {
 		onEachFeature: doInfoStuff,
@@ -163,41 +165,29 @@
 		}
 	});
 
-	fetch('geojson/la-county-regions.json').then(function(resp) {
-		resp.json().then(function(data) {
+	dataFetch.push(fetch('geojson/la-county-regions.json').then(function(resp) {
+		return resp.json().then(function(data) {
 			regions.addData(data);
 		});
-	});
+	}));
 
-	fetch('geojson/surrounding.json').then(function(resp) {
-		resp.json().then(function(data) {
+	dataFetch.push(fetch('geojson/surrounding.json').then(function(resp) {
+		return resp.json().then(function(data) {
 			surroundingCounties.addData(data);
 		});
-	});
+	}));
 	
-	fetch('geojson/freeways.json').then(function(resp) {
-		resp.json().then(function(data) {
+	dataFetch.push(fetch('geojson/freeways.json').then(function(resp) {
+		return resp.json().then(function(data) {
 			freeways.addData(data);
 		});
-	});
+	}));
 
-	fetch('geojson/marina.json').then(function(resp) {
-		resp.json().then(function(data) {
+	dataFetch.push(fetch('geojson/marina.json').then(function(resp) {
+		return resp.json().then(function(data) {
 			freeways.addData(data);
 		});
-	});
-
-	var airports = L.geoJson(undefined, {
-		onEachFeature: function(feature, layer) {
-			layer.bindPopup(feature.properties.name);
-		},
-		style: function(feature) {
-			return { 
-				weight: 1,
-				color: 'orange'
-			};
-		}
-	});
+	}));
 
 	var mapViews = {
 		'initial': {
@@ -319,7 +309,8 @@
 
 	Reveal.initialize({
 	    controls: true,
-	    // embedded: true,
+	    embedded: true,
+	    history: true,
 	    width: 960,
 	    height: 1920,
 	    dependencies: [
@@ -328,8 +319,8 @@
 	    ]
 	});
 
-	Reveal.addEventListener( 'slidechanged', function( event ) {
-		var prevIndex = event.previousSlide.getAttribute('data-map');
+	function handleSlideChange(event) {
+		var prevIndex = event.previousSlide && event.previousSlide.getAttribute('data-map');
 		var mapIndex = event.currentSlide.getAttribute('data-map');
 		var hiliteIndex = event.currentSlide.getAttribute('data-highlight');
 		var doZoom = event.currentSlide.hasAttribute('data-zoom');
@@ -339,6 +330,26 @@
 		if (mapIndex) {
 			applyHighlight(mapIndex, hiliteIndex, doZoom);
 		}
+	}
+	Reveal.addEventListener('slidechanged', function(e) {
+		try {
+			var slide = e.currentSlide;
+			var title = slide.querySelector && slide.querySelector('h2');
+			var titleText = title && title.textContent;
+			ga('send', 'pageview', {
+	  		// we need to send the hash
+				'page': location.pathname + location.search  + location.hash,
+				'title': titleText
+			});
+		} catch(e) {
+			console.log('oops, couldnt send analytics');
+		}
+		handleSlideChange(e);
+	});
+	Reveal.addEventListener('ready', function(e) {
+		Promise.all(dataFetch).then(function () {
+			handleSlideChange(e);
+		});
 	});
 
 })(L, Reveal);
