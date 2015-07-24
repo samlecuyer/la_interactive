@@ -189,6 +189,14 @@
 		});
 	}));
 
+	var markers = {
+		'hollywood-sign': L.marker(coords['hollywood-sign']),
+		'city-hall': L.marker(coords['city-hall']),
+		'bradbury': L.marker([34.050536, -118.247861]),
+		'bunker-hill': L.marker([34.052045, -118.250347]),
+		'angels-flight': L.marker([34.051339, -118.250211])
+	}
+
 	var mapViews = {
 		'initial': {
 			layers: [],
@@ -322,10 +330,23 @@
 	function handleSlideChange(event) {
 		var prevIndex = event.previousSlide && event.previousSlide.getAttribute('data-map');
 		var mapIndex = event.currentSlide.getAttribute('data-map');
+
 		var hiliteIndex = event.currentSlide.getAttribute('data-highlight');
+
+		var prevZoom = event.previousSlide && event.previousSlide.hasAttribute('data-zoom');
 		var doZoom = event.currentSlide.hasAttribute('data-zoom');
-		if (mapIndex && mapIndex !== prevIndex) {
+
+		var prevMarker = event.previousSlide && event.previousSlide.getAttribute('data-map-marker');
+		var marker = event.currentSlide.getAttribute('data-map-marker');
+
+		if (mapIndex && mapIndex !== prevIndex || prevZoom !== doZoom) {
 			applyView(mapIndex, doZoom && hiliteIndex);
+		}
+		if (prevMarker && prevMarker !== marker) {
+			map.removeLayer(markers[prevMarker]);
+		}
+		if (marker && mapIndex) {
+			markers[marker].addTo(map);
 		}
 		if (mapIndex) {
 			applyHighlight(mapIndex, hiliteIndex, doZoom);
@@ -341,6 +362,7 @@
 				'page': location.pathname + location.search  + location.hash,
 				'title': titleText
 			});
+			document.title = titleText;
 		} catch(e) {
 			console.log('oops, couldnt send analytics');
 		}
